@@ -647,7 +647,7 @@ func (b *builtinHello) evalString(row chunk.Row) (string, bool, error) {
 	if isNull || err != nil {
 		return "", isNull, err
 	}
-	str := fmt.Sprintf("hello %x", arg)
+	str := fmt.Sprintf("hello %s", arg)
 	return str, false, nil
 }
 
