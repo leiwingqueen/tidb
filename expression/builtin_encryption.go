@@ -628,6 +628,44 @@ func (b *builtinMD5Sig) evalString(row chunk.Row) (string, bool, error) {
 	return hexStr, false, nil
 }
 
+type helloFunctionClass struct {
+	baseFunctionClass
+}
+
+type builtinHello struct {
+	baseBuiltinFunc
+}
+
+func (b *builtinHello) Clone() builtinFunc {
+	newSig := &builtinHello{}
+	newSig.cloneFrom(&b.baseBuiltinFunc)
+	return newSig
+}
+
+func (b *builtinHello) evalString(row chunk.Row) (string, bool, error) {
+	arg, isNull, err := b.args[0].EvalString(b.ctx, row)
+	if isNull || err != nil {
+		return "", isNull, err
+	}
+	str := fmt.Sprintf("hello %x", arg)
+	return str, false, nil
+}
+
+func (c *helloFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {
+	if err := c.verifyArgs(args); err != nil {
+		return nil, err
+	}
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString)
+	if err != nil {
+		return nil, err
+	}
+	bf.tp.Charset, bf.tp.Collate = ctx.GetSessionVars().GetCharsetInfo()
+	bf.tp.Flen = 32
+	sig := &builtinHello{bf}
+	sig.setPbCode(tipb.ScalarFuncSig_MD5)
+	return sig, nil
+}
+
 type sha1FunctionClass struct {
 	baseFunctionClass
 }
