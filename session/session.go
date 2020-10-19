@@ -1405,6 +1405,8 @@ func (s *session) isTxnRetryable() bool {
 }
 
 func (s *session) NewTxn(ctx context.Context) error {
+	//第一节课程内容
+	logutil.Logger(ctx).Info("hello transaction")
 	if s.txn.Valid() {
 		txnID := s.txn.StartTS()
 		err := s.CommitTxn(ctx)
